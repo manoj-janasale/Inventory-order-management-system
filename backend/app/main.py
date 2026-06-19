@@ -1,34 +1,35 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+
+from app.database import engine
 
 app = FastAPI(
     title="Inventory Management API",
-    version="1.0.0"
+    version="1.0.0",
 )
 
-origins = [
-    "http://localhost:5173",
-    "https://YOUR-VERCEL-URL.vercel.app"
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173",          # local dev
-        "https://your-frontend.vercel.app" # add after you deploy frontend],  # We'll tighten this later
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 @app.get("/")
 def home():
     return {
-        "message": "Inventory Management Backend Running 🚀"
+        "message": "Inventory Management API",
+        "status": "running",
     }
+
 
 @app.get("/health")
 def health():
-    return {
-        "status": "healthy"
-    }
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+
+        return {
+            "status": "healthy",
+            "database": "connected",
+        }
+
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "database": str(e),
+        }
