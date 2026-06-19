@@ -1,19 +1,22 @@
 from fastapi import FastAPI
 from sqlalchemy import text
 
+from app.database import Base
 from app.database import engine
 
 app = FastAPI(
-    title="Inventory Management API",
+    title="Inventory Management System",
     version="1.0.0",
 )
+
+Base.metadata.create_all(bind=engine)
 
 
 @app.get("/")
 def home():
     return {
         "message": "Inventory Management API",
-        "status": "running",
+        "status": "running"
     }
 
 
@@ -25,11 +28,11 @@ def health():
 
         return {
             "status": "healthy",
-            "database": "connected",
+            "database": "connected"
         }
 
     except Exception as e:
         return {
             "status": "unhealthy",
-            "database": str(e),
+            "database": str(e)
         }
