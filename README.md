@@ -8,10 +8,26 @@ The backend exposes a RESTful API built with FastAPI, the frontend is developed 
 
 ---
 
-# High-Level Architecture
+## High-Level Architecture
 
-text                               +----------------------+                               |      End User        |                               |  (Web Browser)       |                               +----------+-----------+                                          |                                          |                                          v                          +-------------------------------+                          |      React Frontend (Vite)    |                          |                               |                          | • Dashboard                   |                          | • Product Management          |                          | • Customer Management         |                          | • Order Management            |                          +---------------+---------------+                                          |                                  REST API (HTTP/JSON)                                          |                                          v                        +------------------------------------+                        |      FastAPI Backend               |                        |------------------------------------|                        | Product APIs                       |                        | Customer APIs                      |                        | Order APIs                         |                        | Dashboard APIs                     |                        |                                    |                        | Business Logic                     |                        | • SKU Validation                   |                        | • Email Validation                 |                        | • Inventory Validation             |                        | • Stock Deduction                  |                        | • Order Total Calculation          |                        +----------------+-------------------+                                         |                                SQLAlchemy ORM                                         |                                         v                            +---------------------------+                            |      PostgreSQL           |                            |---------------------------|                            | Products                  |                            | Customers                 |                            | Orders                    |                            | Order Items               |                            +---------------------------+  
+```mermaid
+flowchart TD
 
+    U[👤 End User]
+
+    F[React Frontend<br/>Vite + Axios]
+
+    B[FastAPI Backend<br/>REST APIs]
+
+    BL[Business Logic<br/>• SKU Validation<br/>• Email Validation<br/>• Inventory Validation<br/>• Stock Management<br/>• Order Total Calculation]
+
+    DB[(PostgreSQL)]
+
+    U --> F
+    F -->|HTTP / JSON| B
+    B --> BL
+    BL --> DB
+```
 ---
 
 # System Components
@@ -55,17 +71,137 @@ The database enforces unique constraints such as Product SKU and Customer Email.
 
 ---
 
-# Business Workflow
+## Business Workflow
 
-text Create Product        │        ▼ Stored in PostgreSQL  Create Customer        │        ▼ Stored in PostgreSQL  Create Order        │        ▼ Validate Customer        │        ▼ Validate Product Stock        │        ▼ Calculate Order Total        │        ▼ Reduce Inventory        │        ▼ Save Order        │        ▼ Return Success Response 
+```mermaid
+flowchart LR
 
+A[Create Order]
+
+B[Validate Customer]
+
+C[Validate Product]
+
+D{Stock Available?}
+
+E[Calculate Total]
+
+F[Reduce Stock]
+
+G[Save Order]
+
+H[Return Success]
+
+I[Return Error]
+
+A --> B
+B --> C
+C --> D
+
+D -->|Yes| E
+D -->|No| I
+
+E --> F
+F --> G
+G --> H
+```
 ---
 
-# Deployment Architecture
+## Deployment Architecture
 
-text                   +----------------------+                   |      Vercel          |                   | React Frontend       |                   +----------+-----------+                              |                              |                              v                   +----------------------+                   |      Render          |                   | FastAPI Backend      |                   +----------+-----------+                              |                              |                              v                   +----------------------+                   |        Neon          |                   |    PostgreSQL DB     |                   +----------------------+ 
+```mermaid
+flowchart TD
 
+    User[👤 User]
+
+    Frontend[Vercel<br/>React Frontend]
+
+    Backend[Render<br/>FastAPI Backend]
+
+    Database[(Neon PostgreSQL)]
+
+    User --> Frontend
+    Frontend --> Backend
+    Backend --> Database
+```
 ---
+
+## Component Architecture
+
+```mermaid
+flowchart LR
+
+subgraph Frontend
+A[Dashboard]
+B[Products]
+C[Customers]
+D[Orders]
+end
+
+subgraph Backend
+E[Product API]
+F[Customer API]
+G[Order API]
+H[Dashboard API]
+end
+
+subgraph Database
+I[(Products)]
+J[(Customers)]
+K[(Orders)]
+L[(Order Items)]
+end
+
+A --> H
+B --> E
+C --> F
+D --> G
+
+E --> I
+F --> J
+G --> K
+G --> L
+```
+
+## Database Schema
+
+```mermaid
+erDiagram
+
+PRODUCT {
+    int id PK
+    string name
+    string sku
+    decimal price
+    int stock
+}
+
+CUSTOMER {
+    int id PK
+    string full_name
+    string email
+    string phone
+}
+
+ORDER {
+    int id PK
+    int customer_id FK
+    decimal total_amount
+    datetime created_at
+}
+
+ORDER_ITEM {
+    int id PK
+    int order_id FK
+    int product_id FK
+    int quantity
+    decimal unit_price
+}
+
+CUSTOMER ||--o{ ORDER : places
+ORDER ||--|{ ORDER_ITEM : contains
+PRODUCT ||--o{ ORDER_ITEM : references
+```
 
 # Technology Stack
 
