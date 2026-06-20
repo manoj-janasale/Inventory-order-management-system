@@ -14,7 +14,15 @@ import {
   ShoppingCart,
 } from "lucide-react";
 
-export function AppSidebar() {
+export function AppSidebar({ currentView, setView }) {
+  // Navigation configuration array to keep code DRY and manageable
+  const menuItems = [
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "products", label: "Products", icon: Package },
+    { id: "customers", label: "Customers", icon: Users },
+    { id: "orders", label: "Orders", icon: ShoppingCart },
+  ];
+
   return (
     <Sidebar>
       <SidebarHeader className="p-6 text-xl font-bold">
@@ -23,35 +31,22 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarMenu>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton>
-              <LayoutDashboard />
-              <span>Dashboard</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton>
-              <Package />
-              <span>Products</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton>
-              <Users />
-              <span>Customers</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton>
-              <ShoppingCart />
-              <span>Orders</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentView === item.id;
+            
+            return (
+              <SidebarMenuItem key={item.id}>
+                <SidebarMenuButton 
+                  onClick={() => setView(item.id)}
+                  className={isActive ? "bg-slate-100 font-semibold text-slate-900" : ""}
+                >
+                  <Icon className={isActive ? "text-slate-900" : "text-slate-500"} />
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarContent>
     </Sidebar>
