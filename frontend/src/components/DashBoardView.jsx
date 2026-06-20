@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-export function DashboardView({ totalCustomers, totalOrders, totalProducts }) {
+export function DashboardView({
+  totalCustomers,
+  totalOrders,
+  totalProducts,
+  customers = [],
+  orders = [],
+  products = [],
+}) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: "start" });
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -13,14 +20,26 @@ export function DashboardView({ totalCustomers, totalOrders, totalProducts }) {
     return () => emblaApi.off("select", onSelect);
   }, [emblaApi]);
 
-  const dashboardTimelineData = [
-    { name: "Jan", sales: 4000, orders: 24, newCustomers: 12 },
-    { name: "Feb", sales: 3000, orders: 18, newCustomers: 19 },
-    { name: "Mar", sales: 5000, orders: 36, newCustomers: 26 },
-    { name: "Apr", sales: 4780, orders: 30, newCustomers: 22 },
-    { name: "May", sales: 6890, orders: 48, newCustomers: 35 },
-    { name: "Jun", sales: 7390, orders: 52, newCustomers: 41 },
-  ];
+  const chartLabel = (value, fallback) => {
+    const label = String(value || fallback);
+    return label.length > 14 ? `${label.slice(0, 12)}...` : label;
+  };
+
+  const productChartData = products.slice(0, 12).map((product) => ({
+    name: chartLabel(product.sku || product.name, `P-${product.id}`),
+    stock: Number(product.quantity) || 0,
+  }));
+
+  const orderChartData = orders.slice(0, 12).reverse().map((order) => ({
+    name: `#${order.id}`,
+    amount: Number(order.total_amount) || 0,
+    quantity: Number(order.quantity) || 0,
+  }));
+
+  const customerChartData = customers.slice(0, 12).reverse().map((customer, index) => ({
+    name: chartLabel(customer.name, `C-${customer.id}`),
+    customers: index + 1,
+  }));
 
   return (
     <div className="animate-in fade-in duration-200">
@@ -64,55 +83,55 @@ export function DashboardView({ totalCustomers, totalOrders, totalProducts }) {
             <p className="text-xs text-slate-500">Swipe or scroll horizontally to toggle specific chart categories.</p>
           </div>
           <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg">
-            <button type="button" onClick={() => emblaApi?.scrollTo(0)} className={`text-xs px-2.5 py-1 font-medium rounded-md transition-all ${selectedIndex === 0 ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"}`}>Revenue</button>
+            <button type="button" onClick={() => emblaApi?.scrollTo(0)} className={`text-xs px-2.5 py-1 font-medium rounded-md transition-all ${selectedIndex === 0 ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"}`}>Products</button>
             <button type="button" onClick={() => emblaApi?.scrollTo(1)} className={`text-xs px-2.5 py-1 font-medium rounded-md transition-all ${selectedIndex === 1 ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"}`}>Orders</button>
-            <button type="button" onClick={() => emblaApi?.scrollTo(2)} className={`text-xs px-2.5 py-1 font-medium rounded-md transition-all ${selectedIndex === 2 ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"}`}>Acquisition</button>
+            <button type="button" onClick={() => emblaApi?.scrollTo(2)} className={`text-xs px-2.5 py-1 font-medium rounded-md transition-all ${selectedIndex === 2 ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"}`}>Customers</button>
           </div>
         </header>
 
         <div ref={emblaRef} className="overflow-hidden cursor-grab active:cursor-grabbing">
           <div className="flex">
             <div className="flex-[0_0_100%] min-w-0 h-80 px-2 select-none">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2">Chart 1: Gross Revenue ($)</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2">Chart 1: Product Stock</span>
               <ResponsiveContainer width="100%" height="90%">
-                <AreaChart data={dashboardTimelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart data={productChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0f172a" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#0f172a" stopOpacity={0}/>
+                    <linearGradient id="productGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#0f766e" stopOpacity={0.18}/>
+                      <stop offset="95%" stopColor="#0f766e" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(val) => `$${val}`} />
-                  <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }} formatter={(val) => [`$${val}`, "Revenue"]} />
-                  <Area type="monotone" dataKey="sales" stroke="#0f172a" strokeWidth={2} fillOpacity={1} fill="url(#revenueGrad)" />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                  <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }} formatter={(val) => [val, "Available Stock"]} />
+                  <Area type="monotone" dataKey="stock" stroke="#0f766e" strokeWidth={2} fillOpacity={1} fill="url(#productGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
 
             <div className="flex-[0_0_100%] min-w-0 h-80 px-2 select-none">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2">Chart 2: Order Fulfillment Count</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2">Chart 2: Order Amounts</span>
               <ResponsiveContainer width="100%" height="90%">
-                <BarChart data={dashboardTimelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <BarChart data={orderChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
-                  <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }} formatter={(val) => [val, "Orders Placed"]} />
-                  <Bar dataKey="orders" fill="#3b82f6" radius={4} maxBarSize={40} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(val) => `$${val}`} />
+                  <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }} formatter={(val, name) => [name === "amount" ? `$${val}` : val, name === "amount" ? "Order Amount" : "Items"]} />
+                  <Bar dataKey="amount" fill="#2563eb" radius={4} maxBarSize={40} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
             <div className="flex-[0_0_100%] min-w-0 h-80 px-2 select-none">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2">Chart 3: Account Registrations</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2">Chart 3: Customers</span>
               <ResponsiveContainer width="100%" height="90%">
-                <LineChart data={dashboardTimelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <LineChart data={customerChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
-                  <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }} formatter={(val) => [val, "New Profiles"]} />
-                  <Line type="monotone" dataKey="newCustomers" stroke="#10b981" strokeWidth={3} dot={{ strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} />
+                  <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }} formatter={(val) => [val, "Customer Count"]} />
+                  <Line type="monotone" dataKey="customers" stroke="#16a34a" strokeWidth={3} dot={{ strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>

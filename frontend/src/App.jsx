@@ -133,6 +133,9 @@ const refreshCustomers = async () => {
                 totalCustomers={customers.length}
                 totalOrders={orders.length}
                 totalProducts={products.length}
+                customers={customers}
+                orders={orders}
+                products={products}
               />
             )}
 
