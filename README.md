@@ -180,7 +180,6 @@ CUSTOMER {
     int id PK
     string full_name
     string email
-    string phone
 }
 
 ORDER {
