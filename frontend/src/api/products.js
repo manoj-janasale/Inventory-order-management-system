@@ -1,7 +1,7 @@
-const BASE_URL = "http://localhost:8000"; // your FastAPI/Node backend
+import { apiUrl } from "@/api/client";
 
 export const createProduct = async (data) => {
-  const res = await fetch(`${BASE_URL}/products`, {
+  const res = await fetch(apiUrl("/products"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -18,7 +18,7 @@ export const createProduct = async (data) => {
 };
 
 export const getProducts = async () => {
-  const res = await fetch(`${BASE_URL}/products`);
+  const res = await fetch(apiUrl("/products"));
 
   if (!res.ok) {
     throw new Error("Failed to fetch products");
@@ -28,7 +28,7 @@ export const getProducts = async () => {
 };
 
 export const deleteProduct = async (sku) => {
-  const res = await fetch(`${BASE_URL}/products/sku/${encodeURIComponent(sku)}`, {
+  const res = await fetch(apiUrl(`/products/sku/${encodeURIComponent(sku)}`), {
     method: "DELETE",
   });
 

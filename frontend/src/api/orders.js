@@ -1,7 +1,7 @@
-const BASE_URL = "http://localhost:8000";
+import { apiUrl } from "@/api/client";
 
 export const createOrder = async (data) => {
-  const res = await fetch(`${BASE_URL}/orders/`, {
+  const res = await fetch(apiUrl("/orders/"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -18,7 +18,7 @@ export const createOrder = async (data) => {
 };
 
 export const deleteOrder = async (orderId) => {
-  const res = await fetch(`${BASE_URL}/orders/${orderId}`, {
+  const res = await fetch(apiUrl(`/orders/${orderId}`), {
     method: "DELETE",
   });
 

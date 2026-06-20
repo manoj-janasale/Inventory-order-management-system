@@ -8,6 +8,7 @@ import { AdminPanelLayout } from "@/components/AdminPanelLayout";
 import { createCustomer, deleteCustomer } from "@/api/customers";
 import { deleteProduct } from "@/api/products";
 import { deleteOrder } from "@/api/orders";
+import { apiUrl } from "@/api/client";
 
 // forms
 import ProductCreateForm from "@/components/forms/ProductCreateForm";
@@ -26,7 +27,7 @@ export default function App() {
   // 🔄 FETCH PRODUCTS
   const refreshProducts = async () => {
     try {
-      const res = await fetch("http://localhost:8000/products/");
+      const res = await fetch(apiUrl("/products/"));
       const data = await res.json();
       setProducts(data);
     } catch (err) {
@@ -35,7 +36,7 @@ export default function App() {
   };
   const refreshOrders = async () => {
   try {
-    const res = await fetch("http://localhost:8000/orders/");
+    const res = await fetch(apiUrl("/orders/"));
     const data = await res.json();
     setOrders(data);
   } catch (err) {
@@ -45,7 +46,7 @@ export default function App() {
 
 const refreshCustomers = async () => {
   try {
-    const res = await fetch("http://localhost:8000/customers/");
+    const res = await fetch(apiUrl("/customers/"));
     const data = await res.json();
     setCustomers(data);
   } catch (err) {

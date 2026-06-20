@@ -1,5 +1,7 @@
+import { apiUrl } from "@/api/client";
+
 export const createCustomer = async (data) => {
-  const res = await fetch("http://localhost:8000/customers/", {
+  const res = await fetch(apiUrl("/customers/"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -16,7 +18,7 @@ export const createCustomer = async (data) => {
 };
 
 export const deleteCustomer = async (customerId) => {
-  const res = await fetch(`http://localhost:8000/customers/${customerId}`, {
+  const res = await fetch(apiUrl(`/customers/${customerId}`), {
     method: "DELETE",
   });
 
