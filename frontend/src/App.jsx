@@ -107,7 +107,10 @@ const refreshCustomers = async () => {
   const mapOrdersToTable = (orders) => {
     return orders.map((order) => ({
       col1: order.id,
-      col2: `${order.customer_name} - ${order.product_name} x ${order.quantity}`,
+      col2: `${order.customer_name} - ${
+        order.items?.map((item) => `${item.product_name} x ${item.quantity}`).join(", ") ||
+        `${order.product_name} x ${order.quantity}`
+      }`,
       col3: `$${Number(order.total_amount).toFixed(2)}`,
       col4: order.status,
     }));

@@ -63,10 +63,23 @@ class CustomerResponse(CustomerCreate):
 # ORDERS
 ##########################
 
-class OrderCreate(BaseModel):
-    customer_id: int = Field(..., gt=0)
+class OrderItemCreate(BaseModel):
     product_id: int = Field(..., gt=0)
     quantity: int = Field(..., gt=0)
+
+
+class OrderCreate(BaseModel):
+    customer_id: int = Field(..., gt=0)
+    items: list[OrderItemCreate] = Field(..., min_length=1)
+
+
+class OrderItemResponse(BaseModel):
+    product_id: int
+    product_name: str
+    product_sku: str
+    quantity: int
+    unit_price: float
+    line_total: float
 
 
 class OrderResponse(BaseModel):
@@ -80,6 +93,7 @@ class OrderResponse(BaseModel):
     unit_price: float
     total_amount: float
     status: str
+    items: list[OrderItemResponse]
 
     class Config:
         from_attributes = True
